@@ -1,0 +1,32 @@
+# Secrets and local environment
+.env
+.env.*
+.venv/
+.venv_cuda/
+venv/
+__pycache__/
+*.py[cod]
+
+# Training caches and generated runtime artifacts
+unsloth_compiled_cache/
+.cache/
+*.log
+test_output.log
+
+# Full generated outputs are private/local. Commit only curated samples and docs.
+outputs/
+!samples/
+!samples/**
+
+# Model weights/checkpoints are released on Hugging Face, not GitHub.
+**/checkpoint-*/
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+
+# Local notebooks or scratch exports
+*.ipynb_checkpoints/
+tmp/
+temp/
