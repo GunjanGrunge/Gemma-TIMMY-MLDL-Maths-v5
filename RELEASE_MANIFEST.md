@@ -7,6 +7,7 @@ This repository intentionally publishes only the files needed to reproduce and u
 - Project README and license
 - Deterministic calculator runtime
 - V5 dataset generator
+- V5.2 advanced calculator/runtime files
 - Unsloth training script
 - Inference/eval helper
 - Minimal public JSONL sample
@@ -30,6 +31,12 @@ The expanded LoRA adapter should be uploaded to Hugging Face from:
 
 ```text
 outputs/v5/models/gemma_dl_lora_expanded
+```
+
+The V5.2 advanced adapter/runtime lineage is tracked locally under:
+
+```text
+outputs/v52/models/gemma_mldl_advanced_lora
 ```
 
 Recommended public display name:

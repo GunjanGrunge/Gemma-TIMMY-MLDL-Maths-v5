@@ -2,7 +2,7 @@
 
 ## Model Summary
 
-Gemma--TIMMY-MLDL-Maths-v5 is a LoRA adapter trained on synthetic ML/DL math instruction data. It is designed to provide formula explanations and tutoring-style responses for machine-learning and deep-learning calculation tasks.
+Gemma--TIMMY-MLDL-Maths-v5 is a LoRA adapter trained on synthetic ML/DL math instruction data and paired with deterministic calculators for production-style numeric reliability. It is designed to provide formula explanations and tutoring-style responses for machine-learning, deep-learning, statistics, forecasting, trading-indicator, portfolio, and vector/kinematics calculation tasks.
 
 The recommended public usage is hybrid: use deterministic calculators for exact arithmetic and the LoRA adapter for explanation style.
 
@@ -15,9 +15,12 @@ The recommended public usage is hybrid: use deterministic calculators for exact 
 ## Training Data
 
 - Synthetic examples generated locally.
-- Training examples: 3560
-- Eval examples: 16
+- V5 training examples: 3560
+- V5 eval examples: 16
+- V5.2 supplemental examples: 876
+- Combined V5/V5.1/V5.2 rows: 4956
 - Public GitHub sample: `samples/v5_dl_min_sample.jsonl`
+- Public V5.2 sample: `samples/v52_advanced_min_sample.jsonl`
 - Full dataset: not included in GitHub.
 
 ## Training Configuration
@@ -36,6 +39,30 @@ The recommended public usage is hybrid: use deterministic calculators for exact 
 - Tensor shape reasoning
 - Semantic-search and cosine-similarity calculations
 - Optimizer update explanations
+- Forecasting and trading-indicator calculations
+- Portfolio return/variance/volatility calculations
+- Hypothesis-test and A/B-test interpretation
+- Vector, projectile, and kinematics calculations
+
+## Guardrails And Stress Testing
+
+The hybrid runtime was stress-tested against adversarial categories without publishing the private prompt set:
+
+- ambiguous defaults
+- conflicting trading signals
+- cross-domain prompts
+- misleading/vague numeric descriptions
+- invalid math domains
+- schema-confusion cases such as weights being mistaken for data
+
+Current local validation:
+
+- V5.2 messy/combined/missing-info regression suite: `437/437`
+- Regression score: `10/10`
+- Adversarial safety before guardrails: about `6.5/10`
+- Adversarial safety after guardrails: about `9.5/10`
+
+The runtime returns structured statuses such as `missing_info`, `invalid_input`, `clarification_needed`, and `default_used` instead of silently guessing.
 
 ## Recommended Runtime
 
@@ -51,6 +78,7 @@ python einstein_dl_hybrid_assistant.py --question "Softmax cross entropy: logits
 - The model can produce plausible but wrong arithmetic if used without calculators.
 - The dataset is synthetic and should not be used for safety-critical decisions without independent validation.
 - The adapter inherits limitations and terms from the Gemma base model.
+- This project is not financial advice, trading advice, legal advice, or safety-critical engineering software.
 
 ## License
 
