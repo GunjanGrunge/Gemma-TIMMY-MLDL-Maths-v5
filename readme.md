@@ -1,3 +1,21 @@
+---
+license: mit
+base_model: unsloth/gemma-2-2b-it-bnb-4bit
+tags:
+  - gemma
+  - unsloth
+  - lora
+  - math
+  - machine-learning
+  - deep-learning
+  - forecasting
+  - trading
+  - guardrails
+language:
+  - en
+pipeline_tag: text-generation
+---
+
 # Gemma--TIMMY-MLDL-Maths-v5
 
 Gemma--TIMMY-MLDL-Maths-v5 is a local math assistant project focused on machine-learning, deep-learning, statistics, forecasting, trading indicators, portfolio math, and vector/kinematics calculations. It combines a fine-tuned Gemma LoRA adapter with deterministic Python calculators so the assistant can explain math clearly while still returning reliable numeric results.
