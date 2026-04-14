@@ -3,7 +3,9 @@
 .env.*
 .venv/
 .venv_cuda/
+.venv_wsl/
 venv/
+.vscode/
 __pycache__/
 *.py[cod]
 

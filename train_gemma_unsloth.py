@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import os
+import random
 
 # Windows + small VRAM fallback: set before importing torch/unsloth.
 os.environ.setdefault("UNSLOTH_RETURN_LOGITS", "1")
@@ -20,8 +21,16 @@ LORA_DROPOUT = float(os.getenv("UNSLOTH_LORA_DROPOUT", "0"))
 PER_DEVICE_BATCH_SIZE = int(os.getenv("UNSLOTH_BATCH_SIZE", "1"))
 GRADIENT_ACCUMULATION_STEPS = int(os.getenv("UNSLOTH_GRAD_ACCUM", "8"))
 MAX_STEPS = int(os.getenv("UNSLOTH_MAX_STEPS", "1"))
+NUM_TRAIN_EPOCHS = float(os.getenv("UNSLOTH_NUM_EPOCHS", "1"))
+LEARNING_RATE = float(os.getenv("UNSLOTH_LEARNING_RATE", "2e-4"))
+LR_SCHEDULER_TYPE = os.getenv("UNSLOTH_LR_SCHEDULER", "cosine")
+MIN_LEARNING_RATE = float(os.getenv("UNSLOTH_MIN_LEARNING_RATE", "0"))
+WARMUP_STEPS = int(os.getenv("UNSLOTH_WARMUP_STEPS", "50"))
+MAX_GRAD_NORM = float(os.getenv("UNSLOTH_MAX_GRAD_NORM", "1.0"))
+SEED = int(os.getenv("UNSLOTH_SEED", "3407"))
 TRAIN_DATA_PATH = os.getenv("UNSLOTH_TRAIN_DATA")
 TRAIN_DATA_FORMAT = os.getenv("UNSLOTH_TRAIN_FORMAT", "auto").lower()
+USE_CHAT_TEMPLATE = os.getenv("UNSLOTH_USE_CHAT_TEMPLATE", "1").lower() not in {"0", "false", "no"}
 OUTPUT_DIR = Path(os.getenv("UNSLOTH_OUTPUT_DIR", "outputs/v4/models/gemma_math_lora"))
 
 try:
@@ -30,6 +39,11 @@ try:
     torch._dynamo.config.suppress_errors = True
 except Exception:
     pass
+
+random.seed(SEED)
+torch.manual_seed(SEED)
+if torch.cuda.is_available():
+    torch.cuda.manual_seed_all(SEED)
 
 
 def require_cuda_torch() -> None:
@@ -56,7 +70,7 @@ except NotImplementedError as e:
         "Run on a CUDA-enabled machine or use an alternative training path."
     ) from e
 
-from datasets import load_dataset
+from datasets import Dataset
 from transformers import TrainingArguments
 from trl import SFTTrainer
 
@@ -76,7 +90,7 @@ model = FastLanguageModel.get_peft_model(
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                     "gate_proj", "up_proj", "down_proj"],
     use_gradient_checkpointing="unsloth",
-    random_state=3407,
+    random_state=SEED,
 )
 
 # 2. Prepare dataset
@@ -89,6 +103,39 @@ def format_alpaca(example):
 
 def format_chat(example):
     messages = example.get("messages", [])
+    if USE_CHAT_TEMPLATE and hasattr(tokenizer, "apply_chat_template"):
+        system_prompt = ""
+        normalized_messages = []
+        for msg in messages:
+            role = msg.get("role")
+            content = msg.get("content", "")
+            if not content:
+                continue
+            if role == "system":
+                system_prompt = content
+            elif role in {"user", "assistant"}:
+                normalized_messages.append({"role": role, "content": content})
+
+        if system_prompt and normalized_messages:
+            first_user_index = next(
+                (index for index, msg in enumerate(normalized_messages) if msg["role"] == "user"),
+                None,
+            )
+            if first_user_index is not None:
+                normalized_messages[first_user_index]["content"] = (
+                    f"{system_prompt}\n\n{normalized_messages[first_user_index]['content']}"
+                )
+
+        if normalized_messages:
+            try:
+                return tokenizer.apply_chat_template(
+                    normalized_messages,
+                    tokenize=False,
+                    add_generation_prompt=False,
+                )
+            except Exception as exc:
+                print(f"Falling back to plain chat formatting: {exc}")
+
     user_prompt = ""
     assistant_response = ""
     for msg in messages:
@@ -140,6 +187,12 @@ def get_dataset_path():
         return path, format_alpaca
 
     candidates = [
+        (Path("outputs/v6/data/v6_combined_train_chat.jsonl"), format_chat),
+        (Path("outputs/v6/data/v6_curated_train_chat.jsonl"), format_chat),
+        (Path("outputs/v52/data/v52_combined_train_chat.jsonl"), format_chat),
+        (Path("outputs/v52/data/v52_advanced_train_chat.jsonl"), format_chat),
+        (Path("outputs/v51/data/v51_combined_train_chat.jsonl"), format_chat),
+        (Path("outputs/v5/data/v5_dl_train_chat.jsonl"), format_chat),
         (Path("outputs/v4/data/v4_train.jsonl"), format_alpaca),
         (Path("outputs/v4/data/v4_train_chat.jsonl"), format_chat),
         (Path("outputs/v3/data/v3_train.jsonl"), format_alpaca),
@@ -177,10 +230,40 @@ data_path, formatter = get_dataset_path()
 print(f"Dataset: {data_path}")
 print(f"Output dir: {OUTPUT_DIR}")
 
-dataset = load_dataset("json", data_files=str(data_path), split="train")
+
+def load_training_texts(path: Path, formatter):
+    """Load JSONL as plain training text.
+
+    The generated datasets keep rich nested metadata for eval/reporting, but
+    training only needs prompt/response text. Loading only text avoids Arrow
+    schema issues when metadata.expected has task-specific shapes.
+    """
+    rows = []
+    skipped = 0
+    with path.open("r", encoding="utf-8") as f:
+        for line_number, line in enumerate(f, 1):
+            if not line.strip():
+                continue
+            try:
+                example = json.loads(line)
+                text = formatter(example)
+            except Exception as exc:
+                skipped += 1
+                print(f"Skipping malformed row {line_number}: {exc}")
+                continue
+            if text.strip():
+                rows.append({"_raw_text": text})
+    if not rows:
+        raise RuntimeError(f"No usable training rows found in {path}")
+    if skipped:
+        print(f"Skipped {skipped} malformed rows.")
+    return Dataset.from_list(rows)
+
+
+dataset = load_training_texts(data_path, formatter)
 
 def add_training_text(example):
-    text = formatter(example)
+    text = example["_raw_text"]
     token_ids = tokenizer(text, add_special_tokens=False, truncation=False)["input_ids"]
     token_count = len(token_ids)
     max_training_tokens = max(1, MAX_SEQ_LENGTH - 2)
@@ -212,25 +295,40 @@ print(
 )
 
 # 3. Train
+training_args_kwargs = {
+    "per_device_train_batch_size": PER_DEVICE_BATCH_SIZE,
+    "gradient_accumulation_steps": GRADIENT_ACCUMULATION_STEPS,
+    "warmup_steps": WARMUP_STEPS,
+    "max_grad_norm": MAX_GRAD_NORM,
+    "max_steps": MAX_STEPS if MAX_STEPS > 0 else -1,
+    "num_train_epochs": NUM_TRAIN_EPOCHS,
+    "learning_rate": LEARNING_RATE,
+    "fp16": not torch.cuda.is_bf16_supported(),
+    "bf16": torch.cuda.is_bf16_supported(),
+    "logging_steps": 20,
+    "output_dir": str(OUTPUT_DIR),
+    "optim": "adamw_8bit",
+    "lr_scheduler_type": LR_SCHEDULER_TYPE,
+    "seed": SEED,
+    "data_seed": SEED,
+}
+if LR_SCHEDULER_TYPE == "cosine_with_min_lr" and MIN_LEARNING_RATE > 0:
+    training_args_kwargs["lr_scheduler_kwargs"] = {"min_lr": MIN_LEARNING_RATE}
+
+try:
+    training_args = TrainingArguments(**training_args_kwargs)
+except TypeError:
+    # Older Transformers builds may not support lr_scheduler_kwargs.
+    training_args_kwargs.pop("lr_scheduler_kwargs", None)
+    training_args = TrainingArguments(**training_args_kwargs)
+
 trainer = SFTTrainer(
     model=model,
     tokenizer=tokenizer,
     train_dataset=dataset,
     dataset_text_field="text",
     max_seq_length=MAX_SEQ_LENGTH,
-    args=TrainingArguments(
-        per_device_train_batch_size=PER_DEVICE_BATCH_SIZE,
-        gradient_accumulation_steps=GRADIENT_ACCUMULATION_STEPS,
-        warmup_steps=50,
-        max_steps=MAX_STEPS,  # Test run by default
-        learning_rate=2e-4,
-        fp16=not torch.cuda.is_bf16_supported(),
-        bf16=torch.cuda.is_bf16_supported(),
-        logging_steps=20,
-        output_dir=str(OUTPUT_DIR),
-        optim="adamw_8bit",
-        lr_scheduler_type="cosine",
-    ),
+    args=training_args,
 )
 
 trainer.train()

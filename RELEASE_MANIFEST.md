@@ -8,12 +8,14 @@ This repository intentionally publishes only the files needed to reproduce and u
 - Deterministic calculator runtime
 - V5 dataset generator
 - V5.2 advanced calculator/runtime files
+- V6 curated supplemental dataset generator
 - Unsloth training script
 - Inference/eval helper
 - Minimal public JSONL sample
 - Model and dataset cards
 - Release notes
 - SVG infographics
+- WSL V6 training instructions and controlled training scripts
 
 ## Excluded From GitHub
 
@@ -37,6 +39,15 @@ The V5.2 advanced adapter/runtime lineage is tracked locally under:
 
 ```text
 outputs/v52/models/gemma_mldl_advanced_lora
+```
+
+The next V6 WSL training path is:
+
+```text
+/workspace/martha
+/workspace/TimmyBot
+outputs/v6/data/v6_combined_train_chat.jsonl
+outputs/v6/models/gemma_timmy_mldl_math_lora
 ```
 
 Recommended public display name:

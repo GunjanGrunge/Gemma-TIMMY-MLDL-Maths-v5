@@ -215,6 +215,13 @@ V5.2 advanced extension:
 - V5.2 stress/regression cases: `437`
 - V5.2 hybrid regression score: `437/437`
 
+V6 local training extension:
+
+- V6 supplemental rows: `3200`
+- Combined V5.2 + V6 rows: `8156`
+- V6 eval cases: `308`
+- V6 focus: ML evaluation, transformer/DL internals, nonparametric statistics, data analytics workflow math, forecasting diagnostics, and structured guardrail behavior
+
 The expanded adapter is intended to be released on Hugging Face. GitHub contains only source code, reports, visuals, and minimal sample data.
 
 ## Recreate The Dataset
@@ -224,12 +231,14 @@ The generators are included for reproducibility, but the full generated datasets
 ```powershell
 python generate_v5_dl_dataset.py
 python generate_v52_advanced_dataset.py
+python generate_v6_curated_dataset.py
 ```
 
 Only minimal public samples are included:
 
 - [samples/v5_dl_min_sample.jsonl](samples/v5_dl_min_sample.jsonl)
 - [samples/v52_advanced_min_sample.jsonl](samples/v52_advanced_min_sample.jsonl)
+- [samples/v6_curated_min_sample.jsonl](samples/v6_curated_min_sample.jsonl)
 
 ## Train The Adapter
 
@@ -245,6 +254,26 @@ $env:UNSLOTH_MAX_STEPS="450"
 $env:TORCHDYNAMO_DISABLE="1"
 python train_gemma_unsloth.py
 ```
+
+## Continue Training In WSL For V6
+
+The preferred local training path is native WSL with a separate Linux virtual environment:
+
+```bash
+cd /mnt/c/Users/Bot/Desktop/martha
+sudo bash scripts/setup_wsl_workspace.sh
+cd /workspace/martha
+bash scripts/train_v6_wsl.sh
+```
+
+The standard WSL workspace is:
+
+```text
+/workspace/martha
+/workspace/TimmyBot
+```
+
+See [docs/WSL_V6_TRAINING.md](docs/WSL_V6_TRAINING.md) for setup, CUDA verification, V6 defaults, and the shared training lock used by Timmy/Codex.
 
 ## Limitations
 
