@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760">
+  <style>
+    .bg { fill: #f5f7fb; }
+    .card { fill: #ffffff; stroke: #d7dfeb; stroke-width: 1.5; }
+    .title { font: 700 36px Georgia, serif; fill: #172033; }
+    .subtitle { font: 16px Verdana, sans-serif; fill: #5b6678; }
+    .section { font: 700 20px Verdana, sans-serif; fill: #172033; }
+    .label { font: 14px Verdana, sans-serif; fill: #2b3442; }
+    .small { font: 13px Verdana, sans-serif; fill: #5b6678; }
+    .metric { font: 700 34px Verdana, sans-serif; fill: #172033; }
+    .metricLabel { font: 13px Verdana, sans-serif; fill: #5b6678; letter-spacing: 0.5px; }
+    .pillText { font: 700 12px Verdana, sans-serif; fill: #ffffff; letter-spacing: 0.4px; }
+    .good { fill: #1f9d55; }
+    .warn { fill: #dc2626; }
+    .mid { fill: #d97706; }
+    .barBg { fill: #e8edf3; }
+    .mono { font: 700 14px 'Courier New', monospace; fill: #172033; }
+  </style>
+
+  <rect class="bg" width="1200" height="760" rx="28"/>
+
+  <rect x="36" y="32" width="1128" height="134" rx="24" class="card"/>
+  <text x="68" y="82" class="title">Martha V6 Hybrid Runtime</text>
+  <text x="68" y="112" class="subtitle">Scoped ML/DL/stats/forecasting assistant built around deterministic calculators and guardrailed routing.</text>
+  <rect x="68" y="128" width="184" height="26" rx="13" class="good"/>
+  <text x="88" y="145" class="pillText">DOMAIN RELEASE READY</text>
+  <rect x="266" y="128" width="170" height="26" rx="13" class="mid"/>
+  <text x="286" y="145" class="pillText">SCOPED PACKAGE ONLY</text>
+  <rect x="450" y="128" width="190" height="26" rx="13" class="warn"/>
+  <text x="470" y="145" class="pillText">NOT GENERAL MATH MODEL</text>
+
+  <rect x="36" y="190" width="360" height="220" rx="24" class="card"/>
+  <text x="64" y="228" class="section">Release Snapshot</text>
+  <text x="64" y="274" class="metric">76.19%</text>
+  <text x="64" y="298" class="metricLabel">OVERALL LOCAL BENCHMARK</text>
+  <text x="64" y="336" class="label">16 pass / 0 partial / 5 fail across 21 cases.</text>
+  <text x="64" y="366" class="label">The failures are entirely from generic public math smoke tests.</text>
+  <text x="64" y="396" class="label">The intended release surface is the scoped helper runtime.</text>
+
+  <rect x="420" y="190" width="744" height="220" rx="24" class="card"/>
+  <text x="448" y="228" class="section">Benchmark Tracks</text>
+  <text x="448" y="267" class="label">timmy_v6_domain</text>
+  <rect x="650" y="251" width="380" height="24" rx="12" class="barBg"/>
+  <rect x="650" y="251" width="380" height="24" rx="12" class="good"/>
+  <text x="1050" y="268" class="mono">100.0%</text>
+
+  <text x="448" y="319" class="label">guardrail</text>
+  <rect x="650" y="303" width="380" height="24" rx="12" class="barBg"/>
+  <rect x="650" y="303" width="380" height="24" rx="12" class="good"/>
+  <text x="1050" y="320" class="mono">100.0%</text>
+
+  <text x="448" y="371" class="label">public_math_smoke</text>
+  <rect x="650" y="355" width="380" height="24" rx="12" class="barBg"/>
+  <rect x="650" y="355" width="1" height="24" rx="12" class="warn"/>
+  <text x="1050" y="372" class="mono">0.0%</text>
+
+  <rect x="36" y="434" width="540" height="286" rx="24" class="card"/>
+  <text x="64" y="472" class="section">What Ships</text>
+  <text x="64" y="512" class="label">1. Deterministic calculators for exact numeric work.</text>
+  <text x="64" y="546" class="label">2. Guardrails for missing, vague, and invalid inputs.</text>
+  <text x="64" y="580" class="label">3. Scoped routers for ML, DL, stats, and forecasting prompts.</text>
+  <text x="64" y="614" class="label">4. Python package surface for direct integration.</text>
+  <text x="64" y="648" class="label">5. Thin Node.js wrapper for teams already scripting in JS.</text>
+  <text x="64" y="690" class="small">What does not ship as the product: raw standalone arithmetic generation.</text>
+
+  <rect x="600" y="434" width="564" height="286" rx="24" class="card"/>
+  <text x="628" y="472" class="section">Operational Guidance</text>
+  <text x="628" y="512" class="label">Use this when prompts are inside the scoped task family:</text>
+  <text x="652" y="544" class="small">ML metrics, tree math, PCA, tensor shapes, label smoothing</text>
+  <text x="652" y="572" class="small">nonparametric stats, multiple testing, funnel analytics</text>
+  <text x="652" y="600" class="small">forecast diagnostics, beta posterior updates, numeric safety checks</text>
+  <text x="628" y="640" class="label">Do not market it as a general public math benchmark winner.</text>
+  <text x="628" y="670" class="label">Position it as a calculator-backed domain assistant.</text>
+  <text x="628" y="700" class="mono">python -m martha_v6 --question "..."</text>
+</svg>

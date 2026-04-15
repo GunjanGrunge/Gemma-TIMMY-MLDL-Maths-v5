@@ -18,9 +18,9 @@ pipeline_tag: text-generation
 
 # Gemma--TIMMY-MLDL-Maths-v5
 
-Gemma--TIMMY-MLDL-Maths-v5 is a local math assistant project focused on machine-learning, deep-learning, statistics, forecasting, trading indicators, portfolio math, and vector/kinematics calculations. It combines a fine-tuned Gemma LoRA adapter with deterministic Python calculators so the assistant can explain math clearly while still returning reliable numeric results.
+Gemma--TIMMY-MLDL-Maths-v5 is a scoped hybrid runtime for machine-learning, deep-learning, statistics, forecasting, trading indicators, portfolio math, and vector/kinematics calculations. It combines model-style explanation with deterministic calculators so the system can speak clearly without pretending generated arithmetic is reliable.
 
-The important design decision is simple: **the LLM explains, the calculators compute**. Raw small-model LoRA adapters are useful for tone, formulas, and tutoring flow, but they are not dependable calculators. This repo therefore ships the hybrid path as the recommended public interface.
+The important design decision is simple: **the model explains, the calculators compute**. Raw small-model adapters are useful for tone, formulas, and tutoring flow, but they are not dependable numeric engines. This repo therefore ships the hybrid path as the public interface.
 
 Current public recommendation:
 
@@ -29,6 +29,19 @@ Current public recommendation:
 - Treat the scoped V6 runtime as a domain assistant, not a general public math model.
 
 ![Architecture](assets/architecture.svg)
+
+## Release Snapshot
+
+![V6 release snapshot](assets/v6_release_snapshot.svg)
+
+At release time, the benchmark story is clean:
+
+- `100%` on scoped `timmy_v6_domain` benchmark tasks
+- `100%` on numeric guardrails
+- `0%` on generic public math smoke prompts
+- `76.19%` overall across the mixed local benchmark
+
+That result is not a problem. It is the product definition. Martha V6 is strong when routed into its intended calculator-backed domains and intentionally does not masquerade as a general-purpose public math benchmark model.
 
 ## What We Built
 
@@ -71,7 +84,7 @@ The V5/V5.2 hybrid system covers these task families:
 
 ![Reliability comparison](assets/reliability_comparison.svg)
 
-The expanded raw LoRA learned the answer style and formula structure, but exact arithmetic remained unreliable. The deterministic calculator-backed assistant scored correctly on the expanded benchmark because it computes values directly instead of relying on generated arithmetic.
+The expanded raw LoRA learned answer style and formula structure, but exact arithmetic remained unreliable. The deterministic calculator-backed assistant scored correctly on the scoped benchmark because it computes values directly instead of relying on generated arithmetic.
 
 Recommended usage:
 
@@ -79,6 +92,45 @@ Recommended usage:
 User prompt -> deterministic calculator route -> formatted answer
             -> fallback to Gemma LoRA for explanation or unsupported tasks
 ```
+
+## Benchmark And Evaluation
+
+The current release benchmark is a local mixed-suite sanity check, not an official GSM8K, MATH, or AIME submission. It is designed to answer one practical question:
+
+`Does the shipped V6 hybrid runtime behave correctly inside its intended domain, and does it fail safely outside it?`
+
+![V6 benchmark chart](outputs/v6/benchmarks/v6_hybrid_benchmark_chart.svg)
+
+### Benchmark Summary
+
+| Track | Pass | Partial | Fail | Score |
+|---|---:|---:|---:|---:|
+| `timmy_v6_domain` | 10 | 0 | 0 | `100.0%` |
+| `guardrail` | 6 | 0 | 0 | `100.0%` |
+| `public_math_smoke` | 0 | 0 | 5 | `0.0%` |
+| `overall` | 16 | 0 | 5 | `76.19%` |
+
+### What Those Numbers Mean
+
+- The scoped hybrid calculators are ready for the domain problems they were built to solve.
+- The guardrail layer is doing its job by refusing or clarifying when inputs are vague, contradictory, or invalid.
+- The system is not trying to be a general public math Olympiad assistant, and the benchmark makes that explicit instead of hiding it.
+
+### Example Benchmark Wins
+
+| Case family | Example output behavior |
+|---|---|
+| Decision-tree impurity | exact `information_gain` and `parent_gini` |
+| PCA | correct explained-variance ratio from covariance input |
+| Label smoothing CE | exact loss plus `dL/dlogits` |
+| Transformer shapes | explicit QKV, score, and output tensor shapes |
+| Multiple testing | Bonferroni plus Benjamini-Hochberg decisions |
+| Forecast diagnostics | exact `sMAPE` and `MASE` |
+| Guardrails | structured `invalid_input`, `missing_info`, and `clarification_needed` JSON |
+
+### Important Benchmark Caveat
+
+The `public_math_smoke` failures are mostly `no_v6_route`, not silent wrong answers. That is a release quality decision: the runtime stays narrow and reliable instead of hallucinating competence outside scope.
 
 ## Stress-Test Hardening
 
@@ -106,16 +158,7 @@ Latest local validation:
 
 The key production lesson: the model was not the main bottleneck. The critical upgrade was the guardrail/interface layer around deterministic calculators.
 
-Latest V6 hybrid benchmark:
-
-| Track | Score |
-|---|---:|
-| Timmy V6 domain tasks | `100%` |
-| Guardrails | `100%` |
-| Public generic math smoke | `0%` |
-| Overall local benchmark | `76.19%` |
-
-This means the releaseable surface should be the scoped hybrid helper, not a general-purpose math package.
+This is why the releaseable surface is the scoped hybrid helper, not a general-purpose math package.
 
 ## Default Transparency
 
