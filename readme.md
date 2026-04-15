@@ -27,6 +27,7 @@ Current public recommendation:
 - Use the `V6` hybrid runtime for production-style ML/DL/stats/forecasting assistance.
 - Treat the `V6.1` raw consultant adapter as experimental; it is not yet a standalone replacement for the hybrid path.
 - Treat the scoped V6 runtime as a domain assistant, not a general public math model.
+- Hugging Face package: `https://huggingface.co/Gunjan/Gemma-TIMMY-MLDL-Maths-v5`
 
 ![Architecture](assets/architecture.svg)
 
