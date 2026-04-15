@@ -223,7 +223,8 @@ def get_dataset_path():
             return path, formatter
 
     raise FileNotFoundError(
-        "No training dataset found. Create outputs/v4/data/v4_train_chat.jsonl or set UNSLOTH_TRAIN_DATA."
+        "No training dataset found in the known outputs/*/data locations. "
+        "Generate a dataset first or set UNSLOTH_TRAIN_DATA."
     )
 
 data_path, formatter = get_dataset_path()

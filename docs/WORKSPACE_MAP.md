@@ -11,6 +11,7 @@ until imports are converted into a package.
 - `einstein_v51_hybrid_assistant.py` - V5.1 fallback layer used by V5.2.
 - `einstein_dl_hybrid_assistant.py` - deep-learning helper parsing/runtime.
 - `advanced_calculators.py`, `dl_calculators.py`, `stats_calculators.py` - deterministic calculator helpers.
+- `martha_v6/` - package wrapper exposing the V6 hybrid runtime as a reusable public API and CLI.
 
 ## Dataset Generators
 
@@ -23,11 +24,18 @@ until imports are converted into a package.
 
 - `train_gemma_unsloth.py` - LoRA training entrypoint.
 - `scripts/train_v6_wsl.sh` - WSL training wrapper.
+- `scripts/train_v61_wsl.sh` - V6.1 consultant-training WSL wrapper.
+- `scripts/train_qwenft_wsl.sh` - clean Qwen fine-tuning wrapper that writes to `qwenft/`.
 - `docs/WSL_V6_TRAINING.md` - WSL setup/training notes.
 
 ## Evaluation And Debug Tools
 
 - `tools/eval/` - adapter eval, benchmark, GPU check, and diagnostic scripts.
+
+## Portable Client
+
+- `CGI/` - lightweight portable client for downloading and running the public
+  V6 hybrid runtime without the full training workspace.
 
 ## Legacy Archive
 
@@ -37,6 +45,7 @@ until imports are converted into a package.
 ## Generated Outputs
 
 - `outputs/v61/data/` - V6.1 generated training/rejected JSONL.
+- `outputs/v61/models/` - V6.1 LoRA outputs.
 - `outputs/v61/reports/` - V6.1 generation report.
 - `outputs/v6/benchmarks/` - local benchmark JSON/Markdown/SVG.
 - `samples/` - small public-safe samples only.
@@ -45,5 +54,5 @@ until imports are converted into a package.
 
 - Keep datasets and reports for enrichment.
 - Keep V5/V5.1/V5.2/V6 final model artifacts for rollback/comparison.
-- Delete old checkpoints and temporary smoke/sanity adapters when disk is tight.
+- Delete abandoned fine-tuning branches and temporary smoke/sanity adapters when disk is tight.
 - Do not train from eval/benchmark prompts.

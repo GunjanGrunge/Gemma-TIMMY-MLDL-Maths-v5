@@ -22,6 +22,12 @@ Gemma--TIMMY-MLDL-Maths-v5 is a local math assistant project focused on machine-
 
 The important design decision is simple: **the LLM explains, the calculators compute**. Raw small-model LoRA adapters are useful for tone, formulas, and tutoring flow, but they are not dependable calculators. This repo therefore ships the hybrid path as the recommended public interface.
 
+Current public recommendation:
+
+- Use the `V6` hybrid runtime for production-style ML/DL/stats/forecasting assistance.
+- Treat the `V6.1` raw consultant adapter as experimental; it is not yet a standalone replacement for the hybrid path.
+- Treat the scoped V6 runtime as a domain assistant, not a general public math model.
+
 ![Architecture](assets/architecture.svg)
 
 ## What We Built
@@ -33,6 +39,7 @@ The important design decision is simple: **the LLM explains, the calculators com
 - Guardrails for missing inputs, invalid inputs, ambiguous prompts, unsafe defaults, and vague numeric descriptions.
 - Evaluation reports showing why raw LoRA alone is not enough for exact arithmetic.
 - Minimal public sample data only. The full generated dataset is intentionally not committed to GitHub.
+- A portable `CGI/` client so teammates can download the runtime from GitHub or Hugging Face and query the hybrid assistant directly.
 
 ## Current Coverage
 
@@ -98,6 +105,17 @@ Latest local validation:
 | Adversarial safety after guardrails | about `9.5/10` |
 
 The key production lesson: the model was not the main bottleneck. The critical upgrade was the guardrail/interface layer around deterministic calculators.
+
+Latest V6 hybrid benchmark:
+
+| Track | Score |
+|---|---:|
+| Timmy V6 domain tasks | `100%` |
+| Guardrails | `100%` |
+| Public generic math smoke | `0%` |
+| Overall local benchmark | `76.19%` |
+
+This means the releaseable surface should be the scoped hybrid helper, not a general-purpose math package.
 
 ## Default Transparency
 
@@ -194,6 +212,34 @@ Expected result:
 
 ```text
 best_document_index=0, cosine_scores=[0.9939, 0, 0.7071]
+```
+
+Use the packaged V6 helper:
+
+```powershell
+python -m pip install -e .
+martha-v6 --question "Decision tree split case: parent class counts=[9, 5], child counts=[[6, 1], [3, 4]]. Compute information gain and gini."
+```
+
+Use the Node wrapper:
+
+```powershell
+node node/cli.js --question "Forecast diagnostics: actuals=[100, 110, 105], forecasts=[98, 112, 108], train_history=[90, 95, 100, 104]. Compute sMAPE and MASE."
+```
+
+The Node package is a thin wrapper over the Python runtime, so it still
+requires Python plus the local `martha_v6` package to be available.
+
+Or import it directly:
+
+```python
+from martha_v6 import answer_structured
+
+result = answer_structured(
+    "Forecast diagnostics: actuals=[100, 110, 105], forecasts=[98, 112, 108], train_history=[90, 95, 100, 104]. Compute sMAPE and MASE."
+)
+print(result.route)
+print(result.output)
 ```
 
 ## Training Summary

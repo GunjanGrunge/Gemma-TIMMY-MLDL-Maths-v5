@@ -1,0 +1,36 @@
+{
+  "name": "martha-v6",
+  "version": "0.1.0",
+  "description": "Scoped hybrid calculator assistant for ML, DL, stats, forecasting, and guardrailed numeric workflows.",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "node/index.js",
+  "bin": {
+    "martha-v6-js": "node/cli.js"
+  },
+  "files": [
+    "node/",
+    "martha_v6/",
+    "einstein_v6_hybrid_assistant.py",
+    "einstein_v52_hybrid_assistant.py",
+    "einstein_v51_hybrid_assistant.py",
+    "einstein_dl_hybrid_assistant.py",
+    "advanced_calculators.py",
+    "dl_calculators.py",
+    "stats_calculators.py",
+    "generate_v6_curated_dataset.py",
+    "pyproject.toml",
+    "readme.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "ml",
+    "deep-learning",
+    "statistics",
+    "forecasting",
+    "hybrid-assistant",
+    "guardrails"
+  ]
+}

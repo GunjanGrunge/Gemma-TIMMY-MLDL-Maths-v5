@@ -8,6 +8,8 @@ venv/
 .vscode/
 __pycache__/
 *.py[cod]
+node_modules/
+dist/
 
 # Training caches and generated runtime artifacts
 unsloth_compiled_cache/
@@ -27,6 +29,7 @@ outputs/
 *.pt
 *.pth
 *.gguf
+*.pem
 
 # Local notebooks or scratch exports
 *.ipynb_checkpoints/

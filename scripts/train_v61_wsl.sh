@@ -9,11 +9,13 @@ LOCK_FILE="${LOCK_FILE:-$MARTHA_DIR/outputs/training.lock}"
 
 if [[ ! -d "$MARTHA_DIR" ]]; then
   echo "Missing Martha workspace: $MARTHA_DIR" >&2
+  echo "Run: sudo bash scripts/setup_wsl_workspace.sh" >&2
   exit 1
 fi
 
 if [[ ! -d "$TIMMYBOT_DIR" ]]; then
   echo "Missing TimmyBot workspace: $TIMMYBOT_DIR" >&2
+  echo "Run: sudo bash scripts/setup_wsl_workspace.sh" >&2
   exit 1
 fi
 
@@ -33,6 +35,13 @@ trap cleanup EXIT
 echo "$$ $(date -Is)" > "$LOCK_FILE"
 
 cd "$MARTHA_DIR"
+
+if [[ ! -d "$VENV_DIR" ]]; then
+  echo "Missing WSL virtualenv: $VENV_DIR" >&2
+  echo "Create it with the commands in docs/WSL_V6_TRAINING.md" >&2
+  exit 1
+fi
+
 source "$VENV_DIR/bin/activate"
 
 export PYTHONPATH="$MARTHA_DIR:$TIMMYBOT_DIR:${PYTHONPATH:-}"

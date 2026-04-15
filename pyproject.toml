@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "martha-v6"
+version = "0.1.0"
+description = "Scoped hybrid calculator assistant for ML, DL, statistics, forecasting, and guardrailed numeric workflows."
+readme = "readme.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Martha Contributors" }
+]
+dependencies = []
+
+[project.scripts]
+martha-v6 = "martha_v6.cli:main"
+
+[tool.setuptools]
+packages = ["martha_v6"]
