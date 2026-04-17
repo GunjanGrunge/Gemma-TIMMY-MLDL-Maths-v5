@@ -294,8 +294,65 @@ def answer_v6_stats_da_forecast(question: str) -> str | None:
     return None
 
 
+def answer_v6_training_consulting(question: str) -> str | None:
+    lower = question.lower()
+
+    if "effective batch size" in lower or "global batch size" in lower:
+        per_device = parse_int("batch size", question) or parse_int("per_device_batch_size", question) or parse_int("micro_batch_size", question)
+        grad_accum = parse_int("gradient accumulation", question) or parse_int("grad accumulation", question) or parse_int("grad_accum", question)
+        devices = parse_int("gpus", question) or parse_int("gpu", question) or parse_int("devices", question) or parse_int("data parallel gpus", question)
+        if devices is None:
+            devices = 1
+        if per_device is not None and grad_accum is not None:
+            effective_batch = int(per_device) * int(grad_accum) * int(devices)
+            return (
+                "Problem: Compute effective batch size for training.\n"
+                "Method: effective_batch_size=per_device_batch_size * gradient_accumulation_steps * number_of_devices.\n"
+                f"Calculation: per_device_batch_size={per_device}, gradient_accumulation_steps={grad_accum}, devices={devices}, effective_batch_size={effective_batch}.\n"
+                f"Result: effective_batch_size={effective_batch}.\n"
+                "Diagnostic note: Larger effective batch sizes usually require retuning learning rate and warmup."
+            )
+        return (
+            "Problem: Explain effective batch size for training.\n"
+            "Method: effective_batch_size=per_device_batch_size * gradient_accumulation_steps * number_of_devices.\n"
+            "Calculation: Need per-device batch size and gradient accumulation; devices defaults to 1 if unspecified.\n"
+            "Result: Provide batch size and gradient accumulation to compute the exact effective batch size.\n"
+            "Diagnostic note: Effective batch size controls optimization dynamics more than the micro-batch alone."
+        )
+
+    if (
+        "overfitting" in lower
+        or ("validation loss" in lower and "training loss" in lower)
+        or ("after several epochs" in lower and "loss" in lower)
+    ):
+        return (
+            "Problem: Diagnose overfitting during training.\n"
+            "Method: Compare training loss, validation loss, and validation metrics across epochs to detect memorization instead of generalization.\n"
+            "Calculation: Overfitting is likely when training loss keeps falling while validation loss rises or validation metrics flatten after several epochs.\n"
+            "Result: First actions are early stopping, fewer epochs, stronger weight decay, more dropout if supported, data augmentation or more data, and a smaller learning-rate tail near the end of training.\n"
+            "Diagnostic note: If the validation set is tiny or noisy, confirm the pattern with multiple eval checkpoints before changing the whole recipe."
+        )
+
+    if (
+        "oscillating training loss" in lower
+        or "loss oscillating" in lower
+        or ("training loss" in lower and "oscillat" in lower)
+        or ("learning rate" in lower and "fix" in lower)
+        or ("lr" in lower and "too high" in lower)
+    ):
+        return (
+            "Problem: Diagnose oscillating training loss and choose a learning-rate fix.\n"
+            "Method: Check whether updates are too aggressive relative to batch size, gradient noise, and warmup schedule.\n"
+            "Calculation: The highest-probability fix order is lower the learning rate, add or lengthen warmup, increase gradient accumulation if memory is tight, clip gradients, and verify that the scheduler is not spiking LR late in training.\n"
+            "Result: Start by reducing learning rate by about 2x to 4x, keep gradient clipping enabled, and rerun a short controlled comparison before changing multiple knobs at once.\n"
+            "Diagnostic note: Oscillation can also come from bad labels, unstable mixed precision, or an effective batch size that is too small for the chosen LR."
+        )
+
+    return None
+
+
 def answer_question(question: str) -> str:
-    for solver in [answer_v6_guardrail, answer_v6_ml, answer_v6_dl, answer_v6_stats_da_forecast]:
+    for solver in [answer_v6_guardrail, answer_v6_ml, answer_v6_dl, answer_v6_stats_da_forecast, answer_v6_training_consulting]:
         response = solver(question)
         if response:
             return response

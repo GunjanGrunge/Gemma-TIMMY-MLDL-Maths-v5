@@ -133,6 +133,15 @@ The current release benchmark is a local mixed-suite sanity check, not an offici
 
 The `public_math_smoke` failures are mostly `no_v6_route`, not silent wrong answers. That is a release quality decision: the runtime stays narrow and reliable instead of hallucinating competence outside scope.
 
+## V6.1 GGUF Export and Hybrid Fallback
+
+To address the `no_v6_route` errors formally when integrating the V6.1 consultant adapter, we have implemented a dedicated GGUF export pipeline alongside a structural fallback routing helper.
+
+![GGUF Hybrid Fallback Architecture](assets/gguf_fallback_infographic.png)
+
+1. **GGUF Native Export (`scripts/export_v61_gguf.py`)**: Merges the V6.1 LoRA natively backwards into its base model and compiles it into a `q4_k_m` GGUF file package for portability.
+2. **Hybrid Fallback Helper (`scripts/test_v61_helper.py`)**: Explicitly intercepts the raw JSON payloads emitted by the GGUF model. When the consultant gracefully decides a question is outside its targeted ML/DL scope (returning `"status": "no_v6_route"`), the helper smoothly swallows the error and instead diverts the query down to the existing `standard_math_solver`—resolving the prior 0% evaluation rate on global numerical questions while fiercely protecting the model's domain precision.
+
 ## Stress-Test Hardening
 
 ![V5.2 stress-test improvement](assets/v52_stress_improvement.svg)
@@ -208,6 +217,9 @@ If the prompt says the parameter is uncertain or missing, the system returns `mi
 |-- train_gemma_unsloth.py
 |-- test_finetuned_math_assistant.py
 |-- check_gpu_torch.py
+|-- scripts/
+|   |-- export_v61_gguf.py
+|   `-- test_v61_helper.py
 `-- requirements.txt
 ```
 

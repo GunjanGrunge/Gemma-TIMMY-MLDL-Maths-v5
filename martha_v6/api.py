@@ -11,6 +11,7 @@ from einstein_v6_hybrid_assistant import (
     answer_v6_guardrail,
     answer_v6_ml,
     answer_v6_stats_da_forecast,
+    answer_v6_training_consulting,
 )
 
 
@@ -19,6 +20,7 @@ SOLVERS = (
     answer_v6_ml,
     answer_v6_dl,
     answer_v6_stats_da_forecast,
+    answer_v6_training_consulting,
 )
 
 
